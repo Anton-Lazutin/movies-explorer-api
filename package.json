@@ -1,0 +1,14 @@
+{
+  "name": "movies-explorer-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "lint": "npx eslint .",
+    "lintfix": "npx eslint . --fix"
+  },
+  "author": "Anton Lazutin",
+  "license": "ISC"
+}

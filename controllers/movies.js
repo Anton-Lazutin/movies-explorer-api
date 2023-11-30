@@ -3,9 +3,34 @@ const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
-module.exports.addCard = (req, res, next) => {
-  const { name, link } = req.body;
-  Movie.create({ name, link, owner: req.user._id })
+module.exports.addMovie = (req, res, next) => {
+  const {
+    country,
+    director,
+    duration,
+    description,
+    year,
+    image,
+    trailerLink,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+  } = req.body;
+  Movie.create({
+    country,
+    director,
+    duration,
+    description,
+    year,
+    image,
+    trailerLink,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+    owner: req.user._id,
+  })
     .then((data) => res.status(201).send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -16,64 +41,27 @@ module.exports.addCard = (req, res, next) => {
     });
 };
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getMovies = (req, res, next) => {
   Movie.find({})
-    .populate(['owner', 'likes'])
-    .then((cards) => res.send(cards))
+    .then((movies) => res.send(movies))
     .catch((err) => next(err));
 };
 
-module.exports.deleteCards = (req, res, next) => {
+module.exports.deleteMovies = (req, res, next) => {
   Movie.findOne({ _id: req.params.cardId })
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
+    .then((movie) => {
+      if (!movie) {
+        throw new NotFoundError('Фильм с указанным id не найден');
       }
-      if (!card.owner.equals(req.user._id)) {
-        throw new ForbiddenError('Карточка другого пользователя');
+      if (!movie.owner.equals(req.user._id)) {
+        throw new ForbiddenError('Невозможно удалить выбранный фильм');
       }
-      Movie.deleteOne(card)
+      Movie.deleteOne(movie)
         .orFail(() => new NotFoundError())
         .then(() => {
-          res.status(200).send({ message: 'Карточка удалена' });
+          res.status(200).send({ message: 'Фильм удален' });
         })
         .catch((err) => next(err));
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректный Id'));
-      } else {
-        next(err);
-      }
-    });
-};
-
-module.exports.likeCards = (req, res, next) => {
-  Movie.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .populate(['owner', 'likes'])
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка не найдена');
-      }
-      return res.send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Некорректный Id'));
-      } else {
-        next(err);
-      }
-    });
-};
-
-module.exports.dislikeCards = (req, res, next) => {
-  Movie.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .populate(['owner', 'likes'])
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка не найдена');
-      }
-      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {

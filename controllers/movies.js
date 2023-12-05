@@ -42,21 +42,21 @@ module.exports.addMovie = (req, res, next) => {
 };
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  Movie.find({ owner: req.user._id })
     .then((movies) => res.send(movies))
     .catch((err) => next(err));
 };
 
 module.exports.deleteMovies = (req, res, next) => {
   Movie.findOne({ _id: req.params.cardId })
-    .then((movie) => {
-      if (!movie) {
+    .then((movieId) => {
+      if (!movieId) {
         throw new NotFoundError('Фильм с указанным id не найден');
       }
-      if (!movie.owner.equals(req.user._id)) {
+      if (!movieId.owner.equals(req.user._id)) {
         throw new ForbiddenError('Невозможно удалить выбранный фильм');
       }
-      Movie.deleteOne(movie)
+      Movie.deleteOne(movieId)
         .orFail(() => new NotFoundError())
         .then(() => {
           res.status(200).send({ message: 'Фильм удален' });

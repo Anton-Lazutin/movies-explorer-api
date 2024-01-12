@@ -1,4 +1,4 @@
 # movies-explorer-api
 
-IP: 158.160.72.16
-Backend: api.movies.lazutin.nomoredomainsmonster.ru
+### IP: 51.250.25.220
+### Backend: api.movies.lazutin.nomoredomainsmonster.ru
